@@ -71,6 +71,14 @@ var
   ToleranciaEQ : Float;
 
 begin
+  if CurrentBar = 1 then
+  begin
+    PosicaoTextoAcima := 0;
+    PosicaoTextoAbaixo := 1;
+    TamanhoFonteLegenda := 8;
+    TamanhoFonteEstrutura := 10;
+  end;
+
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
@@ -78,10 +86,6 @@ begin
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
   FVGLegendaOffset := Close * FVGLegendaOffsetPercentual / 100;
-  PosicaoTextoAcima := 0;
-  PosicaoTextoAbaixo := 1;
-  TamanhoFonteLegenda := 8;
-  TamanhoFonteEstrutura := 10;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
