@@ -94,6 +94,10 @@ begin
     TendenciaInterna := 0;
     OBAltaAtivo := False;
     OBBaixaAtivo := False;
+    FVGAltaTopo := 0;
+    FVGAltaFundo := 0;
+    FVGBaixaTopo := 0;
+    FVGBaixaFundo := 0;
     FVGAltaAtivo := False;
     FVGBaixaAtivo := False;
   end;
