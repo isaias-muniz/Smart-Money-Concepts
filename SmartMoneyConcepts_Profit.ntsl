@@ -170,7 +170,7 @@ begin
 
   // Mitiga primeiro os gaps ativos; se um novo FVG surgir nesta barra, ele
   // substitui os niveis anteriores mesmo que o gap antigo tambem se preencha.
-  // Atualiza gaps ativos mesmo quando ocultos, para nao reexibir estado obsoleto.
+  // Verifica o preenchimento dos gaps ja detectados mesmo quando estao ocultos.
   if FVGAltaAtivo and (Low <= FVGAltaFundo) then
     FVGAltaAtivo := False;
   if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
