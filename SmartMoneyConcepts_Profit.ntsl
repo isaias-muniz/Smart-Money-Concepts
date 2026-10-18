@@ -9,6 +9,10 @@
 // visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
 // por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
 // de hover do cursor; a coloracao e aplicada somente no candle da quebra.
+// Os FVGs exibem apenas o gap mais recente por direcao; as linhas seguem ate o
+// preenchimento e sao interrompidas quando um novo gap substitui o anterior.
+// Validacao manual no Profit: conferir os limites horizontais e as legendas
+// afastadas dos candles em novas ocorrencias de FVG+ e FVG-.
 
 input
   EstruturaSwing(50);
@@ -139,7 +143,7 @@ begin
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
       FVGAltaAgora := True;
-      PlotText("FVG+", clGreen, 0, 8, High + (High - Low));
+      PlotText("FVG+", clGreen, 0, 8, High + (Close * 0.0001));
     end;
     if High < Low[2] then
     begin
@@ -147,7 +151,7 @@ begin
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
       FVGBaixaAgora := True;
-      PlotText("FVG-", clRed, 1, 8, Low - (High - Low));
+      PlotText("FVG-", clRed, 1, 8, Low - (Close * 0.0001));
     end;
   end;
 
