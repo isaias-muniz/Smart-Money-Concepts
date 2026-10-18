@@ -58,19 +58,6 @@ var
   ToleranciaEQ : Float;
 
 begin
-  NoPlot(1);
-  NoPlot(2);
-  NoPlot(3);
-  NoPlot(4);
-  NoPlot(5);
-  NoPlot(6);
-  NoPlot(7);
-  NoPlot(8);
-  NoPlot(9);
-  NoPlot(10);
-  NoPlot(11);
-  NoPlot(12);
-
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
@@ -263,13 +250,22 @@ begin
     begin
       Plot(SwingHigh);
       SetPlotColor(1, clRed);
-    end;
+    end
+    else
+      NoPlot(1);
     if (SwingLow > 0) and
        ((not SwingLowCruza) or QuebraSwingBaixaAgora) then
     begin
       Plot2(SwingLow);
       SetPlotColor(2, clGreen);
-    end;
+    end
+    else
+      NoPlot(2);
+  end;
+  if not MostrarEstruturaSwing then
+  begin
+    NoPlot(1);
+    NoPlot(2);
   end;
 
   if MostrarEstruturaInterna then
@@ -280,14 +276,23 @@ begin
       Plot3(InternoHigh);
       SetPlotColor(3, clMaroon);
       SetPlotStyle(3, psDot);
-    end;
+    end
+    else
+      NoPlot(3);
     if (InternoLow > 0) and
        ((not InternoLowCruza) or QuebraInternaBaixaAgora) then
     begin
       Plot4(InternoLow);
       SetPlotColor(4, clLime);
       SetPlotStyle(4, psDot);
-    end;
+    end
+    else
+      NoPlot(4);
+  end;
+  if not MostrarEstruturaInterna then
+  begin
+    NoPlot(3);
+    NoPlot(4);
   end;
 
   if MostrarFVG then
@@ -298,6 +303,11 @@ begin
       Plot6(FVGAltaFundo);
       SetPlotColor(5, clGreen);
       SetPlotColor(6, clGreen);
+    end
+    else
+    begin
+      NoPlot(5);
+      NoPlot(6);
     end;
     if FVGBaixaAtivo then
     begin
@@ -305,7 +315,19 @@ begin
       Plot8(FVGBaixaFundo);
       SetPlotColor(7, clRed);
       SetPlotColor(8, clRed);
+    end
+    else
+    begin
+      NoPlot(7);
+      NoPlot(8);
     end;
+  end;
+  if not MostrarFVG then
+  begin
+    NoPlot(5);
+    NoPlot(6);
+    NoPlot(7);
+    NoPlot(8);
   end;
 
   if MostrarOrderBlocks then
@@ -316,6 +338,11 @@ begin
       Plot10(OBAltaFundo);
       SetPlotColor(9, clBlue);
       SetPlotColor(10, clBlue);
+    end
+    else
+    begin
+      NoPlot(9);
+      NoPlot(10);
     end;
     if OBBaixaAtivo then
     begin
@@ -323,7 +350,19 @@ begin
       Plot12(OBBaixaFundo);
       SetPlotColor(11, clMaroon);
       SetPlotColor(12, clMaroon);
+    end
+    else
+    begin
+      NoPlot(11);
+      NoPlot(12);
     end;
+  end;
+  if not MostrarOrderBlocks then
+  begin
+    NoPlot(9);
+    NoPlot(10);
+    NoPlot(11);
+    NoPlot(12);
   end;
 
   if ColorirTendencia then
