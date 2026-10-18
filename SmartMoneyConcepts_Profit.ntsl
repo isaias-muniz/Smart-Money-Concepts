@@ -62,6 +62,7 @@ var
   FVGBaixaFundo : Float;
   FVGAltaAtivo : Boolean;
   FVGBaixaAtivo : Boolean;
+  FVGLegendaOffset : Float;
   ToleranciaEQ : Float;
 
 begin
@@ -71,6 +72,7 @@ begin
   QuebraInternaBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
+  FVGLegendaOffset := Close * FVGLegendaOffsetPercentual / 100;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
@@ -145,16 +147,14 @@ begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
-      PlotText("FVG+", clGreen, 0, 8,
-               High + (Close * FVGLegendaOffsetPercentual / 100));
+      PlotText("FVG+", clGreen, 0, 8, High + FVGLegendaOffset);
     end;
     if High < Low[2] then
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
-      PlotText("FVG-", clRed, 1, 8,
-               Low - (Close * FVGLegendaOffsetPercentual / 100));
+      PlotText("FVG-", clRed, 1, 8, Low - FVGLegendaOffset);
     end;
   end;
 
