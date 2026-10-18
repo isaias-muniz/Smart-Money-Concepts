@@ -15,15 +15,17 @@
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
 // Somente as legendas FVG recebem deslocamento; as demais mantem a posicao original.
-// Validacao manual no Profit: conferir os limites horizontais e as legendas
-// afastadas dos candles em novas ocorrencias de FVG+ e FVG-.
+// Validacao manual: High[2]=100 e Low=101 geram FVG+ em 101/100; High
+// futuro <=100 preenche-o. Low[2]=101 e High=100 geram FVG- em 101/100;
+// High futuro >=101 preenche-o. Um novo gap da mesma direcao substitui esses
+// niveis. As legendas ficam fora do limite externo pelo offset configurado.
 
 input
   EstruturaSwing(50);
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
-  // Percentual nao negativo de Close; 0.05 corresponde a 0.05% do preco.
+  // Percentual de Close; 0.05 = 0.05%. Valores negativos sao tratados como zero.
   FVGLegendaOffsetPercentual(0.05);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
