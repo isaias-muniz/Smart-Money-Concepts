@@ -18,7 +18,7 @@
 // Validacao manual: High[2]=100 e Low=101 geram FVG+ em 101/100; Low
 // futuro <=100 preenche-o. Low[2]=101 e High=100 geram FVG- em 101/100;
 // High futuro >=101 preenche-o. Um novo gap da mesma direcao substitui esses
-// niveis. As legendas ficam fora do limite externo pelo offset configurado.
+// niveis. As legendas ficam em 101+FVGLegendaOffset e 100-FVGLegendaOffset.
 
 input
   EstruturaSwing(50);
@@ -80,6 +80,23 @@ begin
   PosicaoTextoAbaixo := 1;
   TamanhoFonteLegenda := 8;
   TamanhoFonteEstrutura := 10;
+  if CurrentBar <= 2 then
+  begin
+    SwingHigh := 0;
+    SwingLow := 0;
+    InternoHigh := 0;
+    InternoLow := 0;
+    SwingHighCruza := False;
+    SwingLowCruza := False;
+    InternoHighCruza := False;
+    InternoLowCruza := False;
+    TendenciaSwing := 0;
+    TendenciaInterna := 0;
+    OBAltaAtivo := False;
+    OBBaixaAtivo := False;
+    FVGAltaAtivo := False;
+    FVGBaixaAtivo := False;
+  end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
@@ -153,6 +170,7 @@ begin
 
   // Mitiga primeiro os gaps ativos; qualquer novo FVG detectado nesta barra
   // substitui os niveis anteriores e inicia um novo estado ativo.
+  // Atualiza gaps ativos mesmo quando ocultos, para nao reexibir estado obsoleto.
   if FVGAltaAtivo and (Low <= FVGAltaFundo) then
     FVGAltaAtivo := False;
   if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
