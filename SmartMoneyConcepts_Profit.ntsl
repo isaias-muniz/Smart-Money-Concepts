@@ -1,0 +1,326 @@
+// Indicador Smart Money Concepts (SMC) para Profit Chart / NTSL.
+// Adaptacao do conceito de "Smart Money Concepts [LuxAlgo]".
+// Original © LuxAlgo, licenca CC BY-NC-SA 4.0:
+// https://creativecommons.org/licenses/by-nc-sa/4.0/
+// Uso nao comercial; redistribuir sob a mesma licenca e manter a atribuicao.
+//
+// O Profit/NTSL nao oferece o mesmo modelo de objetos de grafico do Pine/MT5.
+// Este port sinaliza estrutura, EQH/EQL, FVG e Order Blocks com plots/textos;
+// nao reproduz caixas, alertas, niveis MTF ou o desenho historico objeto-a-objeto.
+
+input
+  EstruturaSwing(50);
+  EstruturaInterna(5);
+  BarrasBuscaOB(20);
+  ToleranciaEQPercentual(0.10);
+  MostrarEstruturaSwing(True);
+  MostrarEstruturaInterna(True);
+  MostrarSwings(True);
+  MostrarEQH_EQL(True);
+  MostrarFVG(True);
+  MostrarOrderBlocks(True);
+  ColorirTendencia(False);
+
+var
+  i : Integer;
+  SwingHighCandidato : Boolean;
+  SwingLowCandidato : Boolean;
+  InternoHighCandidato : Boolean;
+  InternoLowCandidato : Boolean;
+  SwingHigh : Float;
+  SwingLow : Float;
+  InternoHigh : Float;
+  InternoLow : Float;
+  SwingHighCruza : Boolean;
+  SwingLowCruza : Boolean;
+  InternoHighCruza : Boolean;
+  InternoLowCruza : Boolean;
+  TendenciaSwing : Integer;
+  TendenciaInterna : Integer;
+  EventoSwingAlta : Boolean;
+  EventoSwingBaixa : Boolean;
+  EventoInternoAlta : Boolean;
+  EventoInternoBaixa : Boolean;
+  EncontrouOB : Boolean;
+  OBAltaTopo : Float;
+  OBAltaFundo : Float;
+  OBBaixaTopo : Float;
+  OBBaixaFundo : Float;
+  OBAltaAtivo : Boolean;
+  OBBaixaAtivo : Boolean;
+  FVGAltaTopo : Float;
+  FVGAltaFundo : Float;
+  FVGBaixaTopo : Float;
+  FVGBaixaFundo : Float;
+  FVGAltaAtivo : Boolean;
+  FVGBaixaAtivo : Boolean;
+  ToleranciaEQ : Float;
+
+begin
+  NoPlot(1);
+  NoPlot(2);
+  NoPlot(3);
+  NoPlot(4);
+  NoPlot(5);
+  NoPlot(6);
+  NoPlot(7);
+  NoPlot(8);
+  NoPlot(9);
+  NoPlot(10);
+  NoPlot(11);
+  NoPlot(12);
+
+  EventoSwingAlta := False;
+  EventoSwingBaixa := False;
+  EventoInternoAlta := False;
+  EventoInternoBaixa := False;
+  ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
+
+  if CurrentBar > (EstruturaSwing * 2) then
+  begin
+    SwingHighCandidato := True;
+    SwingLowCandidato := True;
+    for i := 0 to (EstruturaSwing * 2) do
+    begin
+      if High[EstruturaSwing] < High[i] then
+        SwingHighCandidato := False;
+      if Low[EstruturaSwing] > Low[i] then
+        SwingLowCandidato := False;
+    end;
+
+    if SwingHighCandidato then
+    begin
+      if MostrarEQH_EQL and (SwingHigh > 0) and
+         (High[EstruturaSwing] <= SwingHigh + ToleranciaEQ) and
+         (High[EstruturaSwing] >= SwingHigh - ToleranciaEQ) then
+        PlotText("EQH", clRed, 0, 8);
+      SwingHigh := High[EstruturaSwing];
+      SwingHighCruza := False;
+      if MostrarSwings then
+        PlotText("SH", clRed, 0, 8);
+    end;
+
+    if SwingLowCandidato then
+    begin
+      if MostrarEQH_EQL and (SwingLow > 0) and
+         (Low[EstruturaSwing] <= SwingLow + ToleranciaEQ) and
+         (Low[EstruturaSwing] >= SwingLow - ToleranciaEQ) then
+        PlotText("EQL", clGreen, 1, 8);
+      SwingLow := Low[EstruturaSwing];
+      SwingLowCruza := False;
+      if MostrarSwings then
+        PlotText("SL", clGreen, 1, 8);
+    end;
+  end;
+
+  if CurrentBar > (EstruturaInterna * 2) then
+  begin
+    InternoHighCandidato := True;
+    InternoLowCandidato := True;
+    for i := 0 to (EstruturaInterna * 2) do
+    begin
+      if High[EstruturaInterna] < High[i] then
+        InternoHighCandidato := False;
+      if Low[EstruturaInterna] > Low[i] then
+        InternoLowCandidato := False;
+    end;
+
+    if InternoHighCandidato then
+    begin
+      InternoHigh := High[EstruturaInterna];
+      InternoHighCruza := False;
+    end;
+    if InternoLowCandidato then
+    begin
+      InternoLow := Low[EstruturaInterna];
+      InternoLowCruza := False;
+    end;
+  end;
+
+  if MostrarFVG and (CurrentBar > 2) then
+  begin
+    if Low > High[2] then
+    begin
+      FVGAltaTopo := Low;
+      FVGAltaFundo := High[2];
+      FVGAltaAtivo := True;
+      PlotText("FVG+", clGreen, 0, 8);
+    end;
+    if High < Low[2] then
+    begin
+      FVGBaixaTopo := Low[2];
+      FVGBaixaFundo := High;
+      FVGBaixaAtivo := True;
+      PlotText("FVG-", clRed, 1, 8);
+    end;
+  end;
+
+  if FVGAltaAtivo and (Low <= FVGAltaFundo) then
+    FVGAltaAtivo := False;
+  if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
+    FVGBaixaAtivo := False;
+
+  if MostrarOrderBlocks then
+  begin
+    if OBAltaAtivo and (Low <= OBAltaFundo) then
+      OBAltaAtivo := False;
+    if OBBaixaAtivo and (High >= OBBaixaTopo) then
+      OBBaixaAtivo := False;
+  end;
+
+  if (SwingHigh > 0) and (not SwingHighCruza) and
+     (Close > SwingHigh) and (Close[1] <= SwingHigh) then
+  begin
+    EventoSwingAlta := True;
+    SwingHighCruza := True;
+    if TendenciaSwing = -1 then
+      PlotText("CHoCH", clGreen, 0, 10)
+    else
+      PlotText("BOS", clGreen, 0, 10);
+    TendenciaSwing := 1;
+
+    if MostrarOrderBlocks then
+    begin
+      EncontrouOB := False;
+      for i := 1 to BarrasBuscaOB do
+      begin
+        if (not EncontrouOB) and (Open[i] > Close[i]) then
+        begin
+          OBAltaTopo := High[i];
+          OBAltaFundo := Low[i];
+          OBAltaAtivo := True;
+          EncontrouOB := True;
+        end;
+      end;
+    end;
+  end;
+
+  if (SwingLow > 0) and (not SwingLowCruza) and
+     (Close < SwingLow) and (Close[1] >= SwingLow) then
+  begin
+    EventoSwingBaixa := True;
+    SwingLowCruza := True;
+    if TendenciaSwing = 1 then
+      PlotText("CHoCH", clRed, 1, 10)
+    else
+      PlotText("BOS", clRed, 1, 10);
+    TendenciaSwing := -1;
+
+    if MostrarOrderBlocks then
+    begin
+      EncontrouOB := False;
+      for i := 1 to BarrasBuscaOB do
+      begin
+        if (not EncontrouOB) and (Open[i] < Close[i]) then
+        begin
+          OBBaixaTopo := High[i];
+          OBBaixaFundo := Low[i];
+          OBBaixaAtivo := True;
+          EncontrouOB := True;
+        end;
+      end;
+    end;
+  end;
+
+  if (InternoHigh > 0) and (not InternoHighCruza) and
+     (Close > InternoHigh) and (Close[1] <= InternoHigh) then
+  begin
+    EventoInternoAlta := True;
+    InternoHighCruza := True;
+    if MostrarEstruturaInterna then
+    begin
+      if TendenciaInterna = -1 then
+        PlotText("iCHoCH", clLime, 0, 8)
+      else
+        PlotText("iBOS", clLime, 0, 8);
+    end;
+    TendenciaInterna := 1;
+  end;
+
+  if (InternoLow > 0) and (not InternoLowCruza) and
+     (Close < InternoLow) and (Close[1] >= InternoLow) then
+  begin
+    EventoInternoBaixa := True;
+    InternoLowCruza := True;
+    if MostrarEstruturaInterna then
+    begin
+      if TendenciaInterna = 1 then
+        PlotText("iCHoCH", clRed, 1, 8)
+      else
+        PlotText("iBOS", clRed, 1, 8);
+    end;
+    TendenciaInterna := -1;
+  end;
+
+  if MostrarEstruturaSwing then
+  begin
+    if SwingHigh > 0 then
+    begin
+      Plot(SwingHigh);
+      SetPlotColor(1, clRed);
+    end;
+    if SwingLow > 0 then
+    begin
+      Plot2(SwingLow);
+      SetPlotColor(2, clGreen);
+    end;
+  end;
+
+  if MostrarEstruturaInterna then
+  begin
+    if InternoHigh > 0 then
+    begin
+      Plot3(InternoHigh);
+      SetPlotColor(3, clMaroon);
+    end;
+    if InternoLow > 0 then
+    begin
+      Plot4(InternoLow);
+      SetPlotColor(4, clLime);
+    end;
+  end;
+
+  if MostrarFVG then
+  begin
+    if FVGAltaAtivo then
+    begin
+      Plot5(FVGAltaTopo);
+      Plot6(FVGAltaFundo);
+      SetPlotColor(5, clGreen);
+      SetPlotColor(6, clGreen);
+    end;
+    if FVGBaixaAtivo then
+    begin
+      Plot7(FVGBaixaTopo);
+      Plot8(FVGBaixaFundo);
+      SetPlotColor(7, clRed);
+      SetPlotColor(8, clRed);
+    end;
+  end;
+
+  if MostrarOrderBlocks then
+  begin
+    if OBAltaAtivo then
+    begin
+      Plot9(OBAltaTopo);
+      Plot10(OBAltaFundo);
+      SetPlotColor(9, clBlue);
+      SetPlotColor(10, clBlue);
+    end;
+    if OBBaixaAtivo then
+    begin
+      Plot11(OBBaixaTopo);
+      Plot12(OBBaixaFundo);
+      SetPlotColor(11, clMaroon);
+      SetPlotColor(12, clMaroon);
+    end;
+  end;
+
+  if ColorirTendencia then
+  begin
+    if TendenciaSwing = 1 then
+      PaintBar(clGreen)
+    else if TendenciaSwing = -1 then
+      PaintBar(clRed);
+  end;
+end;
