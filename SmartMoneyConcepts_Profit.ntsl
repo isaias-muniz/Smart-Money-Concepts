@@ -36,6 +36,10 @@ var
   SwingLowCruza : Boolean;
   InternoHighCruza : Boolean;
   InternoLowCruza : Boolean;
+  QuebraSwingAltaAgora : Boolean;
+  QuebraSwingBaixaAgora : Boolean;
+  QuebraInternaAltaAgora : Boolean;
+  QuebraInternaBaixaAgora : Boolean;
   TendenciaSwing : Integer;
   TendenciaInterna : Integer;
   EncontrouOB : Boolean;
@@ -67,6 +71,10 @@ begin
   NoPlot(11);
   NoPlot(12);
 
+  QuebraSwingAltaAgora := False;
+  QuebraSwingBaixaAgora := False;
+  QuebraInternaAltaAgora := False;
+  QuebraInternaBaixaAgora := False;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
 
   if CurrentBar > (EstruturaSwing * 2) then
@@ -161,6 +169,7 @@ begin
   if (SwingHigh > 0) and (not SwingHighCruza) and
      (Close > SwingHigh) and (Close[1] <= SwingHigh) then
   begin
+    QuebraSwingAltaAgora := True;
     SwingHighCruza := True;
     if TendenciaSwing = -1 then
       PlotText("CHoCH", clGreen, 0, 10, Close)
@@ -190,6 +199,7 @@ begin
   if (SwingLow > 0) and (not SwingLowCruza) and
      (Close < SwingLow) and (Close[1] >= SwingLow) then
   begin
+    QuebraSwingBaixaAgora := True;
     SwingLowCruza := True;
     if TendenciaSwing = 1 then
       PlotText("CHoCH", clRed, 1, 10, Close)
@@ -219,6 +229,7 @@ begin
   if (InternoHigh > 0) and (not InternoHighCruza) and
      (Close > InternoHigh) and (Close[1] <= InternoHigh) then
   begin
+    QuebraInternaAltaAgora := True;
     InternoHighCruza := True;
     if MostrarEstruturaInterna then
     begin
@@ -233,6 +244,7 @@ begin
   if (InternoLow > 0) and (not InternoLowCruza) and
      (Close < InternoLow) and (Close[1] >= InternoLow) then
   begin
+    QuebraInternaBaixaAgora := True;
     InternoLowCruza := True;
     if MostrarEstruturaInterna then
     begin
@@ -246,12 +258,14 @@ begin
 
   if MostrarEstruturaSwing then
   begin
-    if SwingHigh > 0 then
+    if (SwingHigh > 0) and
+       ((not SwingHighCruza) or QuebraSwingAltaAgora) then
     begin
       Plot(SwingHigh);
       SetPlotColor(1, clRed);
     end;
-    if SwingLow > 0 then
+    if (SwingLow > 0) and
+       ((not SwingLowCruza) or QuebraSwingBaixaAgora) then
     begin
       Plot2(SwingLow);
       SetPlotColor(2, clGreen);
@@ -260,15 +274,19 @@ begin
 
   if MostrarEstruturaInterna then
   begin
-    if InternoHigh > 0 then
+    if (InternoHigh > 0) and
+       ((not InternoHighCruza) or QuebraInternaAltaAgora) then
     begin
       Plot3(InternoHigh);
       SetPlotColor(3, clMaroon);
+      SetPlotStyle(3, psDot);
     end;
-    if InternoLow > 0 then
+    if (InternoLow > 0) and
+       ((not InternoLowCruza) or QuebraInternaBaixaAgora) then
     begin
       Plot4(InternoLow);
       SetPlotColor(4, clLime);
+      SetPlotStyle(4, psDot);
     end;
   end;
 
