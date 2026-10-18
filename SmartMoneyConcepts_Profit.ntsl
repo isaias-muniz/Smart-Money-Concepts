@@ -64,6 +64,10 @@ var
   FVGAltaAtivo : Boolean;
   FVGBaixaAtivo : Boolean;
   FVGLegendaOffset : Float;
+  PosicaoTextoAcima : Integer;
+  PosicaoTextoAbaixo : Integer;
+  TamanhoFonteLegenda : Integer;
+  TamanhoFonteEstrutura : Integer;
   ToleranciaEQ : Float;
 
 begin
@@ -74,6 +78,10 @@ begin
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
   FVGLegendaOffset := Close * FVGLegendaOffsetPercentual / 100;
+  PosicaoTextoAcima := 0;
+  PosicaoTextoAbaixo := 1;
+  TamanhoFonteLegenda := 8;
+  TamanhoFonteEstrutura := 10;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
@@ -92,11 +100,11 @@ begin
       if MostrarEQH_EQL and (SwingHigh > 0) and
          (High[EstruturaSwing] <= SwingHigh + ToleranciaEQ) and
          (High[EstruturaSwing] >= SwingHigh - ToleranciaEQ) then
-        PlotText("EQH", clRed, 0, 8, High[EstruturaSwing]);
+        PlotText("EQH", clRed, PosicaoTextoAcima, TamanhoFonteLegenda, High[EstruturaSwing]);
       SwingHigh := High[EstruturaSwing];
       SwingHighCruza := False;
       if MostrarSwings then
-        PlotText("SH", clRed, 0, 8, High[EstruturaSwing]);
+        PlotText("SH", clRed, PosicaoTextoAcima, TamanhoFonteLegenda, High[EstruturaSwing]);
     end;
 
     if SwingLowCandidato then
@@ -104,11 +112,11 @@ begin
       if MostrarEQH_EQL and (SwingLow > 0) and
          (Low[EstruturaSwing] <= SwingLow + ToleranciaEQ) and
          (Low[EstruturaSwing] >= SwingLow - ToleranciaEQ) then
-        PlotText("EQL", clGreen, 1, 8, Low[EstruturaSwing]);
+        PlotText("EQL", clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, Low[EstruturaSwing]);
       SwingLow := Low[EstruturaSwing];
       SwingLowCruza := False;
       if MostrarSwings then
-        PlotText("SL", clGreen, 1, 8, Low[EstruturaSwing]);
+        PlotText("SL", clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, Low[EstruturaSwing]);
     end;
   end;
 
@@ -143,20 +151,21 @@ begin
 
   if MostrarFVG and (CurrentBar > 2) then
   begin
-    // PlotText: 0 posiciona acima, 1 abaixo; 8 e o tamanho da legenda.
     if Low > High[2] then
     begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
-      PlotText("FVG+", clGreen, 0, 8, High + FVGLegendaOffset);
+      PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
+               High + FVGLegendaOffset);
     end;
     if High < Low[2] then
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
-      PlotText("FVG-", clRed, 1, 8, Low - FVGLegendaOffset);
+      PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
+               Low - FVGLegendaOffset);
     end;
   end;
 
@@ -172,9 +181,9 @@ begin
     DirecaoQuebraAgora := 1;
     SwingHighCruza := True;
     if TendenciaSwing = -1 then
-      PlotText("CHoCH", clGreen, 0, 10, Close)
+      PlotText("CHoCH", clGreen, PosicaoTextoAcima, TamanhoFonteEstrutura, Close)
     else
-      PlotText("BOS", clGreen, 0, 10, Close);
+      PlotText("BOS", clGreen, PosicaoTextoAcima, TamanhoFonteEstrutura, Close);
     TendenciaSwing := 1;
 
     if MostrarOrderBlocks then
@@ -203,9 +212,9 @@ begin
     DirecaoQuebraAgora := -1;
     SwingLowCruza := True;
     if TendenciaSwing = 1 then
-      PlotText("CHoCH", clRed, 1, 10, Close)
+      PlotText("CHoCH", clRed, PosicaoTextoAbaixo, TamanhoFonteEstrutura, Close)
     else
-      PlotText("BOS", clRed, 1, 10, Close);
+      PlotText("BOS", clRed, PosicaoTextoAbaixo, TamanhoFonteEstrutura, Close);
     TendenciaSwing := -1;
 
     if MostrarOrderBlocks then
@@ -236,9 +245,9 @@ begin
     if MostrarEstruturaInterna then
     begin
       if TendenciaInterna = -1 then
-        PlotText("iCHoCH", clLime, 0, 8, Close)
+        PlotText("iCHoCH", clLime, PosicaoTextoAcima, TamanhoFonteLegenda, Close)
       else
-        PlotText("iBOS", clLime, 0, 8, Close);
+        PlotText("iBOS", clLime, PosicaoTextoAcima, TamanhoFonteLegenda, Close);
     end;
     TendenciaInterna := 1;
   end;
@@ -252,9 +261,9 @@ begin
     if MostrarEstruturaInterna then
     begin
       if TendenciaInterna = 1 then
-        PlotText("iCHoCH", clRed, 1, 8, Close)
+        PlotText("iCHoCH", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, Close)
       else
-        PlotText("iBOS", clRed, 1, 8, Close);
+        PlotText("iBOS", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, Close);
     end;
     TendenciaInterna := -1;
   end;
