@@ -20,6 +20,7 @@ input
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
+  // Percentual de Close; 0.01 corresponde a 0.01% do preco.
   FVGLegendaOffsetPercentual(0.01);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
@@ -142,6 +143,7 @@ begin
 
   if MostrarFVG and (CurrentBar > 2) then
   begin
+    // PlotText: 0 posiciona acima, 1 abaixo; 8 e o tamanho da legenda.
     if Low > High[2] then
     begin
       FVGAltaTopo := Low;
