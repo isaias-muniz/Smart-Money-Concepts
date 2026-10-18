@@ -139,7 +139,7 @@ begin
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
       FVGAltaAgora := True;
-      PlotText("FVG+", clGreen, 0, 8, Low + (Low - High[2]));
+      PlotText("FVG+", clGreen, 0, 8, High + (High - Low));
     end;
     if High < Low[2] then
     begin
@@ -147,7 +147,7 @@ begin
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
       FVGBaixaAgora := True;
-      PlotText("FVG-", clRed, 1, 8, High - (Low[2] - High));
+      PlotText("FVG-", clRed, 1, 8, Low - (High - Low));
     end;
   end;
 
@@ -309,28 +309,24 @@ begin
 
   if MostrarFVG then
   begin
-    if FVGAltaAgora then
+    if FVGAltaAtivo and (not FVGAltaAgora) then
     begin
       Plot5(FVGAltaTopo);
       Plot6(FVGAltaFundo);
       SetPlotColor(5, clGreen);
       SetPlotColor(6, clGreen);
-      SetPlotStyle(5, psDot);
-      SetPlotStyle(6, psDot);
     end
     else
     begin
       NoPlot(5);
       NoPlot(6);
     end;
-    if FVGBaixaAgora then
+    if FVGBaixaAtivo and (not FVGBaixaAgora) then
     begin
       Plot7(FVGBaixaTopo);
       Plot8(FVGBaixaFundo);
       SetPlotColor(7, clRed);
       SetPlotColor(8, clRed);
-      SetPlotStyle(7, psDot);
-      SetPlotStyle(8, psDot);
     end
     else
     begin
