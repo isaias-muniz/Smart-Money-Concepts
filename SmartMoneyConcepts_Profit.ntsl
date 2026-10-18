@@ -93,11 +93,11 @@ begin
       if MostrarEQH_EQL and (SwingHigh > 0) and
          (High[EstruturaSwing] <= SwingHigh + ToleranciaEQ) and
          (High[EstruturaSwing] >= SwingHigh - ToleranciaEQ) then
-        PlotText("EQH", clRed, 0, 8);
+        PlotText("EQH", clRed, 0, 8, High[EstruturaSwing]);
       SwingHigh := High[EstruturaSwing];
       SwingHighCruza := False;
       if MostrarSwings then
-        PlotText("SH", clRed, 0, 8);
+        PlotText("SH", clRed, 0, 8, High[EstruturaSwing]);
     end;
 
     if SwingLowCandidato then
@@ -105,11 +105,11 @@ begin
       if MostrarEQH_EQL and (SwingLow > 0) and
          (Low[EstruturaSwing] <= SwingLow + ToleranciaEQ) and
          (Low[EstruturaSwing] >= SwingLow - ToleranciaEQ) then
-        PlotText("EQL", clGreen, 1, 8);
+        PlotText("EQL", clGreen, 1, 8, Low[EstruturaSwing]);
       SwingLow := Low[EstruturaSwing];
       SwingLowCruza := False;
       if MostrarSwings then
-        PlotText("SL", clGreen, 1, 8);
+        PlotText("SL", clGreen, 1, 8, Low[EstruturaSwing]);
     end;
   end;
 
@@ -144,14 +144,14 @@ begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
-      PlotText("FVG+", clGreen, 0, 8);
+      PlotText("FVG+", clGreen, 0, 8, Low);
     end;
     if High < Low[2] then
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
-      PlotText("FVG-", clRed, 1, 8);
+      PlotText("FVG-", clRed, 1, 8, High);
     end;
   end;
 
@@ -174,22 +174,25 @@ begin
     EventoSwingAlta := True;
     SwingHighCruza := True;
     if TendenciaSwing = -1 then
-      PlotText("CHoCH", clGreen, 0, 10)
+      PlotText("CHoCH", clGreen, 0, 10, Close)
     else
-      PlotText("BOS", clGreen, 0, 10);
+      PlotText("BOS", clGreen, 0, 10, Close);
     TendenciaSwing := 1;
 
     if MostrarOrderBlocks then
     begin
       EncontrouOB := False;
-      for i := 1 to BarrasBuscaOB do
+      if CurrentBar > BarrasBuscaOB then
       begin
-        if (not EncontrouOB) and (Open[i] > Close[i]) then
+        for i := 1 to BarrasBuscaOB do
         begin
-          OBAltaTopo := High[i];
-          OBAltaFundo := Low[i];
-          OBAltaAtivo := True;
-          EncontrouOB := True;
+          if (not EncontrouOB) and (Open[i] > Close[i]) then
+          begin
+            OBAltaTopo := High[i];
+            OBAltaFundo := Low[i];
+            OBAltaAtivo := True;
+            EncontrouOB := True;
+          end;
         end;
       end;
     end;
@@ -201,22 +204,25 @@ begin
     EventoSwingBaixa := True;
     SwingLowCruza := True;
     if TendenciaSwing = 1 then
-      PlotText("CHoCH", clRed, 1, 10)
+      PlotText("CHoCH", clRed, 1, 10, Close)
     else
-      PlotText("BOS", clRed, 1, 10);
+      PlotText("BOS", clRed, 1, 10, Close);
     TendenciaSwing := -1;
 
     if MostrarOrderBlocks then
     begin
       EncontrouOB := False;
-      for i := 1 to BarrasBuscaOB do
+      if CurrentBar > BarrasBuscaOB then
       begin
-        if (not EncontrouOB) and (Open[i] < Close[i]) then
+        for i := 1 to BarrasBuscaOB do
         begin
-          OBBaixaTopo := High[i];
-          OBBaixaFundo := Low[i];
-          OBBaixaAtivo := True;
-          EncontrouOB := True;
+          if (not EncontrouOB) and (Open[i] < Close[i]) then
+          begin
+            OBBaixaTopo := High[i];
+            OBBaixaFundo := Low[i];
+            OBBaixaAtivo := True;
+            EncontrouOB := True;
+          end;
         end;
       end;
     end;
@@ -230,9 +236,9 @@ begin
     if MostrarEstruturaInterna then
     begin
       if TendenciaInterna = -1 then
-        PlotText("iCHoCH", clLime, 0, 8)
+        PlotText("iCHoCH", clLime, 0, 8, Close)
       else
-        PlotText("iBOS", clLime, 0, 8);
+        PlotText("iBOS", clLime, 0, 8, Close);
     end;
     TendenciaInterna := 1;
   end;
@@ -245,9 +251,9 @@ begin
     if MostrarEstruturaInterna then
     begin
       if TendenciaInterna = 1 then
-        PlotText("iCHoCH", clRed, 1, 8)
+        PlotText("iCHoCH", clRed, 1, 8, Close)
       else
-        PlotText("iBOS", clRed, 1, 8);
+        PlotText("iBOS", clRed, 1, 8, Close);
     end;
     TendenciaInterna := -1;
   end;
