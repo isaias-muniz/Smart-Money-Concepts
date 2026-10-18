@@ -10,8 +10,8 @@
 // visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
 // por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
 // de hover do cursor; a coloracao e aplicada somente no candle da quebra.
-// Os FVGs exibem apenas o gap mais recente por direcao; as linhas seguem ate o
-// preenchimento e os niveis sao atualizados quando um novo gap e identificado.
+// Os FVGs exibem apenas o gap mais recente por direcao; um novo gap substitui
+// as linhas de qualquer gap anterior ainda nao preenchido nessa direcao.
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
 // Somente as legendas FVG recebem deslocamento; as demais mantem a posicao original.
@@ -23,8 +23,8 @@ input
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
-  // Percentual de Close; 0.01 corresponde a 0.01% do preco.
-  FVGLegendaOffsetPercentual(0.01);
+  // Percentual nao negativo de Close; 0.05 corresponde a 0.05% do preco.
+  FVGLegendaOffsetPercentual(0.05);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
   MostrarSwings(True);
@@ -84,7 +84,9 @@ begin
   QuebraInternaBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
-  FVGLegendaOffset := Close * FVGLegendaOffsetPercentual / 100;
+  FVGLegendaOffset := 0;
+  if FVGLegendaOffsetPercentual > 0 then
+    FVGLegendaOffset := Close * FVGLegendaOffsetPercentual / 100;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
@@ -162,7 +164,7 @@ begin
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
-               High + FVGLegendaOffset);
+               FVGAltaTopo + FVGLegendaOffset);
     end;
     if High < Low[2] then
     begin
@@ -170,7 +172,7 @@ begin
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
       PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
-               Low - FVGLegendaOffset);
+               FVGBaixaFundo - FVGLegendaOffset);
     end;
   end;
 
