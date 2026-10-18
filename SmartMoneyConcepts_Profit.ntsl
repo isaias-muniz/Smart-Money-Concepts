@@ -4,9 +4,10 @@
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 // Uso nao comercial; redistribuir sob a mesma licenca e manter a atribuicao.
 //
-// O Profit/NTSL nao oferece o mesmo modelo de objetos de grafico do Pine/MT5.
-// Este port sinaliza estrutura, EQH/EQL, FVG e Order Blocks com plots/textos;
-// nao reproduz caixas, alertas, niveis MTF ou o desenho historico objeto-a-objeto.
+// Port parcial: os sinais sao desenhados com plots/textos e os textos aparecem
+// na barra de confirmacao. Nao reproduz caixas, alertas, niveis MTF ou paridade
+// visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
+// por direcao; Order Blocks internos nao estao incluidos.
 
 input
   EstruturaSwing(50);
@@ -37,10 +38,6 @@ var
   InternoLowCruza : Boolean;
   TendenciaSwing : Integer;
   TendenciaInterna : Integer;
-  EventoSwingAlta : Boolean;
-  EventoSwingBaixa : Boolean;
-  EventoInternoAlta : Boolean;
-  EventoInternoBaixa : Boolean;
   EncontrouOB : Boolean;
   OBAltaTopo : Float;
   OBAltaFundo : Float;
@@ -70,10 +67,6 @@ begin
   NoPlot(11);
   NoPlot(12);
 
-  EventoSwingAlta := False;
-  EventoSwingBaixa := False;
-  EventoInternoAlta := False;
-  EventoInternoBaixa := False;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
 
   if CurrentBar > (EstruturaSwing * 2) then
@@ -160,18 +153,14 @@ begin
   if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
     FVGBaixaAtivo := False;
 
-  if MostrarOrderBlocks then
-  begin
-    if OBAltaAtivo and (Low <= OBAltaFundo) then
-      OBAltaAtivo := False;
-    if OBBaixaAtivo and (High >= OBBaixaTopo) then
-      OBBaixaAtivo := False;
-  end;
+  if OBAltaAtivo and (Low <= OBAltaFundo) then
+    OBAltaAtivo := False;
+  if OBBaixaAtivo and (High >= OBBaixaTopo) then
+    OBBaixaAtivo := False;
 
   if (SwingHigh > 0) and (not SwingHighCruza) and
      (Close > SwingHigh) and (Close[1] <= SwingHigh) then
   begin
-    EventoSwingAlta := True;
     SwingHighCruza := True;
     if TendenciaSwing = -1 then
       PlotText("CHoCH", clGreen, 0, 10, Close)
@@ -201,7 +190,6 @@ begin
   if (SwingLow > 0) and (not SwingLowCruza) and
      (Close < SwingLow) and (Close[1] >= SwingLow) then
   begin
-    EventoSwingBaixa := True;
     SwingLowCruza := True;
     if TendenciaSwing = 1 then
       PlotText("CHoCH", clRed, 1, 10, Close)
@@ -231,7 +219,6 @@ begin
   if (InternoHigh > 0) and (not InternoHighCruza) and
      (Close > InternoHigh) and (Close[1] <= InternoHigh) then
   begin
-    EventoInternoAlta := True;
     InternoHighCruza := True;
     if MostrarEstruturaInterna then
     begin
@@ -246,7 +233,6 @@ begin
   if (InternoLow > 0) and (not InternoLowCruza) and
      (Close < InternoLow) and (Close[1] >= InternoLow) then
   begin
-    EventoInternoBaixa := True;
     InternoLowCruza := True;
     if MostrarEstruturaInterna then
     begin
