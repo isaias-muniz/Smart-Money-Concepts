@@ -71,14 +71,10 @@ var
   ToleranciaEQ : Float;
 
 begin
-  if CurrentBar = 1 then
-  begin
-    PosicaoTextoAcima := 0;
-    PosicaoTextoAbaixo := 1;
-    TamanhoFonteLegenda := 8;
-    TamanhoFonteEstrutura := 10;
-  end;
-
+  PosicaoTextoAcima := 0;
+  PosicaoTextoAbaixo := 1;
+  TamanhoFonteLegenda := 8;
+  TamanhoFonteEstrutura := 10;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
@@ -148,6 +144,8 @@ begin
     end;
   end;
 
+  // Mitiga primeiro os gaps ativos; qualquer novo FVG detectado nesta barra
+  // substitui os niveis anteriores e inicia um novo estado ativo.
   if FVGAltaAtivo and (Low <= FVGAltaFundo) then
     FVGAltaAtivo := False;
   if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
