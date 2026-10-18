@@ -3,6 +3,7 @@
 // Original © LuxAlgo, licenca CC BY-NC-SA 4.0:
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 // Uso nao comercial; redistribuir sob a mesma licenca e manter a atribuicao.
+// Este arquivo usa somente caracteres ASCII por compatibilidade com o editor NTSL.
 //
 // Port parcial: os sinais sao desenhados com plots/textos e os textos aparecem
 // na barra de confirmacao. Nao reproduz caixas, alertas, niveis MTF ou paridade
@@ -10,7 +11,7 @@
 // por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
 // de hover do cursor; a coloracao e aplicada somente no candle da quebra.
 // Os FVGs exibem apenas o gap mais recente por direcao; as linhas seguem ate o
-// preenchimento e sao interrompidas quando um novo gap substitui o anterior.
+// preenchimento e os niveis sao atualizados quando um novo gap e identificado.
 // Validacao manual no Profit: conferir os limites horizontais e as legendas
 // afastadas dos candles em novas ocorrencias de FVG+ e FVG-.
 
@@ -19,6 +20,7 @@ input
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
+  FVGLegendaOffsetPercentual(0.01);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
   MostrarSwings(True);
@@ -60,8 +62,6 @@ var
   FVGBaixaFundo : Float;
   FVGAltaAtivo : Boolean;
   FVGBaixaAtivo : Boolean;
-  FVGAltaAgora : Boolean;
-  FVGBaixaAgora : Boolean;
   ToleranciaEQ : Float;
 
 begin
@@ -69,8 +69,6 @@ begin
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
   QuebraInternaBaixaAgora := False;
-  FVGAltaAgora := False;
-  FVGBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
 
@@ -135,6 +133,11 @@ begin
     end;
   end;
 
+  if FVGAltaAtivo and (Low <= FVGAltaFundo) then
+    FVGAltaAtivo := False;
+  if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
+    FVGBaixaAtivo := False;
+
   if MostrarFVG and (CurrentBar > 2) then
   begin
     if Low > High[2] then
@@ -142,23 +145,18 @@ begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
-      FVGAltaAgora := True;
-      PlotText("FVG+", clGreen, 0, 8, High + (Close * 0.0001));
+      PlotText("FVG+", clGreen, 0, 8,
+               High + (Close * FVGLegendaOffsetPercentual / 100));
     end;
     if High < Low[2] then
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
-      FVGBaixaAgora := True;
-      PlotText("FVG-", clRed, 1, 8, Low - (Close * 0.0001));
+      PlotText("FVG-", clRed, 1, 8,
+               Low - (Close * FVGLegendaOffsetPercentual / 100));
     end;
   end;
-
-  if FVGAltaAtivo and (Low <= FVGAltaFundo) then
-    FVGAltaAtivo := False;
-  if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
-    FVGBaixaAtivo := False;
 
   if OBAltaAtivo and (Low <= OBAltaFundo) then
     OBAltaAtivo := False;
@@ -313,7 +311,7 @@ begin
 
   if MostrarFVG then
   begin
-    if FVGAltaAtivo and (not FVGAltaAgora) then
+    if FVGAltaAtivo then
     begin
       Plot5(FVGAltaTopo);
       Plot6(FVGAltaFundo);
@@ -325,7 +323,7 @@ begin
       NoPlot(5);
       NoPlot(6);
     end;
-    if FVGBaixaAtivo and (not FVGBaixaAgora) then
+    if FVGBaixaAtivo then
     begin
       Plot7(FVGBaixaTopo);
       Plot8(FVGBaixaFundo);
