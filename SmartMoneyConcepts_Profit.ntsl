@@ -56,6 +56,8 @@ var
   FVGBaixaFundo : Float;
   FVGAltaAtivo : Boolean;
   FVGBaixaAtivo : Boolean;
+  FVGAltaAgora : Boolean;
+  FVGBaixaAgora : Boolean;
   ToleranciaEQ : Float;
 
 begin
@@ -63,6 +65,8 @@ begin
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
   QuebraInternaBaixaAgora := False;
+  FVGAltaAgora := False;
+  FVGBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
 
@@ -134,14 +138,16 @@ begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
       FVGAltaAtivo := True;
-      PlotText("FVG+", clGreen, 0, 8, Low);
+      FVGAltaAgora := True;
+      PlotText("FVG+", clGreen, 0, 8, Low + (Low - High[2]));
     end;
     if High < Low[2] then
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
       FVGBaixaAtivo := True;
-      PlotText("FVG-", clRed, 1, 8, High);
+      FVGBaixaAgora := True;
+      PlotText("FVG-", clRed, 1, 8, High - (Low[2] - High));
     end;
   end;
 
@@ -303,24 +309,28 @@ begin
 
   if MostrarFVG then
   begin
-    if FVGAltaAtivo then
+    if FVGAltaAgora then
     begin
       Plot5(FVGAltaTopo);
       Plot6(FVGAltaFundo);
       SetPlotColor(5, clGreen);
       SetPlotColor(6, clGreen);
+      SetPlotStyle(5, psDot);
+      SetPlotStyle(6, psDot);
     end
     else
     begin
       NoPlot(5);
       NoPlot(6);
     end;
-    if FVGBaixaAtivo then
+    if FVGBaixaAgora then
     begin
       Plot7(FVGBaixaTopo);
       Plot8(FVGBaixaFundo);
       SetPlotColor(7, clRed);
       SetPlotColor(8, clRed);
+      SetPlotStyle(7, psDot);
+      SetPlotStyle(8, psDot);
     end
     else
     begin
