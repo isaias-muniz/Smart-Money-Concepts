@@ -20,7 +20,7 @@ input
   MostrarEQH_EQL(True);
   MostrarFVG(True);
   MostrarOrderBlocks(True);
-  ColorirTendencia(False);
+  ColorirTendencia(True);
 
 var
   i : Integer;
@@ -367,6 +367,7 @@ begin
 
   if ColorirTendencia then
   begin
+    // Mantem a cor da ultima quebra swing ate uma quebra swing oposta.
     if TendenciaSwing = 1 then
       PaintBar(clGreen)
     else if TendenciaSwing = -1 then
