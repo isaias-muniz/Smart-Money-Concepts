@@ -7,8 +7,8 @@
 // Port parcial: os sinais sao desenhados com plots/textos e os textos aparecem
 // na barra de confirmacao. Nao reproduz caixas, alertas, niveis MTF ou paridade
 // visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
-// por direcao; Order Blocks internos nao estao incluidos. A coloracao segue as
-// quebras do timeframe atual; NTSL nao expoe evento de hover do cursor.
+// por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
+// de hover do cursor, portanto este indicador nao altera as cores dos candles.
 
 input
   EstruturaSwing(50);
@@ -21,7 +21,6 @@ input
   MostrarEQH_EQL(True);
   MostrarFVG(True);
   MostrarOrderBlocks(True);
-  ColorirTendencia(True);
 
 var
   i : Integer;
@@ -43,7 +42,6 @@ var
   QuebraInternaBaixaAgora : Boolean;
   TendenciaSwing : Integer;
   TendenciaInterna : Integer;
-  TendenciaColoracao : Integer;
   EncontrouOB : Boolean;
   OBAltaTopo : Float;
   OBAltaFundo : Float;
@@ -165,7 +163,6 @@ begin
     else
       PlotText("BOS", clGreen, 0, 10, Close);
     TendenciaSwing := 1;
-    TendenciaColoracao := 1;
 
     if MostrarOrderBlocks then
     begin
@@ -196,7 +193,6 @@ begin
     else
       PlotText("BOS", clRed, 1, 10, Close);
     TendenciaSwing := -1;
-    TendenciaColoracao := -1;
 
     if MostrarOrderBlocks then
     begin
@@ -230,7 +226,6 @@ begin
         PlotText("iBOS", clLime, 0, 8, Close);
     end;
     TendenciaInterna := 1;
-    TendenciaColoracao := 1;
   end;
 
   if (InternoLow > 0) and (not InternoLowCruza) and
@@ -246,7 +241,6 @@ begin
         PlotText("iBOS", clRed, 1, 8, Close);
     end;
     TendenciaInterna := -1;
-    TendenciaColoracao := -1;
   end;
 
   if MostrarEstruturaSwing then
@@ -371,13 +365,4 @@ begin
     NoPlot(12);
   end;
 
-  if ColorirTendencia then
-  begin
-    // Usa as quebras detectadas no timeframe atual do grafico.
-    // A cor permanece ate a proxima quebra swing ou interna.
-    if TendenciaColoracao = 1 then
-      PaintBar(clGreen)
-    else if TendenciaColoracao = -1 then
-      PaintBar(clRed);
-  end;
 end;
