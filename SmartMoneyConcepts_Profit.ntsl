@@ -40,6 +40,7 @@ var
   QuebraSwingBaixaAgora : Boolean;
   QuebraInternaAltaAgora : Boolean;
   QuebraInternaBaixaAgora : Boolean;
+  DirecaoQuebraAgora : Integer;
   TendenciaSwing : Integer;
   TendenciaInterna : Integer;
   EncontrouOB : Boolean;
@@ -62,6 +63,7 @@ begin
   QuebraSwingBaixaAgora := False;
   QuebraInternaAltaAgora := False;
   QuebraInternaBaixaAgora := False;
+  DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
 
   if CurrentBar > (EstruturaSwing * 2) then
@@ -157,6 +159,7 @@ begin
      (Close > SwingHigh) and (Close[1] <= SwingHigh) then
   begin
     QuebraSwingAltaAgora := True;
+    DirecaoQuebraAgora := 1;
     SwingHighCruza := True;
     if TendenciaSwing = -1 then
       PlotText("CHoCH", clGreen, 0, 10, Close)
@@ -187,6 +190,7 @@ begin
      (Close < SwingLow) and (Close[1] >= SwingLow) then
   begin
     QuebraSwingBaixaAgora := True;
+    DirecaoQuebraAgora := -1;
     SwingLowCruza := True;
     if TendenciaSwing = 1 then
       PlotText("CHoCH", clRed, 1, 10, Close)
@@ -217,6 +221,7 @@ begin
      (Close > InternoHigh) and (Close[1] <= InternoHigh) then
   begin
     QuebraInternaAltaAgora := True;
+    DirecaoQuebraAgora := 1;
     InternoHighCruza := True;
     if MostrarEstruturaInterna then
     begin
@@ -232,6 +237,7 @@ begin
      (Close < InternoLow) and (Close[1] >= InternoLow) then
   begin
     QuebraInternaBaixaAgora := True;
+    DirecaoQuebraAgora := -1;
     InternoLowCruza := True;
     if MostrarEstruturaInterna then
     begin
@@ -364,5 +370,10 @@ begin
     NoPlot(11);
     NoPlot(12);
   end;
+
+  if DirecaoQuebraAgora = 1 then
+    PaintBar(clGreen)
+  else if DirecaoQuebraAgora = -1 then
+    PaintBar(clRed);
 
 end;
