@@ -14,6 +14,7 @@
 // preenchimento e os niveis sao atualizados quando um novo gap e identificado.
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
+// Somente as legendas FVG recebem deslocamento; as demais mantem a posicao original.
 // Validacao manual no Profit: conferir os limites horizontais e as legendas
 // afastadas dos candles em novas ocorrencias de FVG+ e FVG-.
 
