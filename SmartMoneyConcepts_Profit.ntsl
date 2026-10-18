@@ -8,7 +8,7 @@
 // na barra de confirmacao. Nao reproduz caixas, alertas, niveis MTF ou paridade
 // visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
 // por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
-// de hover do cursor, portanto este indicador nao altera as cores dos candles.
+// de hover do cursor; a coloracao e aplicada somente no candle da quebra.
 
 input
   EstruturaSwing(50);
