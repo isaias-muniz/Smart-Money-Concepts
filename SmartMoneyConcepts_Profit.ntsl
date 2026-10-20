@@ -13,11 +13,11 @@
 // Cada FVG tem duas linhas pontilhadas curtas na zona, sem extensao continua.
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
-// Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
-// Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
-// por duas barras; sem gap nao ha linhas. Se gaps da mesma direcao forem
-// consecutivos, a linha anterior e interrompida e a nova aparece nas duas
-// barras seguintes. FVG+/- fica no meio da zona, entre os dois limites.
+// Validacao manual: High[2]=100 e Low=101 geram FVG+ em 101/100; Low[2]=101
+// e High=100 geram FVG- em 101/100. Cada par aparece na deteccao e na barra
+// seguinte; sem gap nao ha linha. Se outro gap da mesma direcao surgir durante
+// o segmento, NoPlot interrompe a linha e o novo par aparece nas duas barras
+// seguintes a deteccao. FVG+/- fica no meio da zona, entre os limites.
 
 input
   EstruturaSwing(50);
@@ -177,7 +177,8 @@ begin
     end;
   end;
 
-  // Estado e plots separados mantem cor/limites independentes por direcao.
+  // Estados separados correspondem aos IDs fixos de plot 5/6 (alta) e 7/8
+  // (baixa), mantendo cores e limites independentes por direcao.
   FVGAltaPlotAgora := False;
   FVGBaixaPlotAgora := False;
   // Duas amostras consecutivas produzem um segmento curto de plot.
