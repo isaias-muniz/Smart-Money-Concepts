@@ -15,8 +15,8 @@
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
 // Validacao manual: High[2]=100 e Low=101 geram FVG+ em 101/100; Low[2]=101
 // e High=100 geram FVG- em 101/100. Isolado: plot na deteccao e barra seguinte.
-// Consecutivo: conclui o par atual, deixa uma barra NoPlot e inicia os niveis
-// pendentes; se surgir outro durante a espera, atualiza os niveis pendentes.
+// Consecutivo: conclui o par atual; a barra seguinte e NoPlot e, depois dela,
+// inicia os niveis pendentes. Outro gap durante a espera atualiza esses niveis.
 // FVG+/- fica no meio da zona, entre os limites.
 
 input
@@ -211,8 +211,8 @@ begin
              (Low[2] + High) / 2);
   end;
 
-  // Manter os blocos de alta e baixa sincronizados: cada um reserva uma barra
-  // NoPlot entre o fim do segmento atual e o inicio do segmento pendente.
+  // Manter os blocos de alta e baixa sincronizados. AguardarQuebra=1 e consumido
+  // na unica barra NoPlot entre o fim do segmento e o inicio do proximo.
   if not MostrarFVG then
   begin
     FVGAltaBarrasRestantes := 0;
