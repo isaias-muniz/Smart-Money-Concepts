@@ -18,7 +18,8 @@
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
 // somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
-// sao conectados. Offset percentual zero usa o minimo de 0.01% do Close.
+// sao conectados. Offset zero/negativo usa no minimo 0.01% do Close e a legenda
+// fica afastada pelo menos pela amplitude High-Low da barra.
 
 input
   EstruturaSwing(50);
@@ -82,6 +83,7 @@ begin
   PosicaoTextoAbaixo := 1;
   TamanhoFonteLegenda := 8;
   TamanhoFonteEstrutura := 10;
+  TextoMarcadorLimiteFVG := "---";
   if CurrentBar <= 2 then
   begin
     SwingHigh := 0;
@@ -96,7 +98,6 @@ begin
     TendenciaInterna := 0;
     OBAltaAtivo := False;
     OBBaixaAtivo := False;
-    TextoMarcadorLimiteFVG := "---";
   end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
@@ -125,6 +126,8 @@ begin
         Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
     if FVGLegendaOffset < FVGLegendaOffsetMinimo then
       FVGLegendaOffset := FVGLegendaOffsetMinimo;
+    if (High - Low) > FVGLegendaOffset then
+      FVGLegendaOffset := High - Low;
   end;
 
   if CurrentBar > (EstruturaSwing * 2) then
