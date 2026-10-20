@@ -17,7 +17,8 @@
 // Somente as legendas FVG recebem deslocamento; as demais mantem a posicao original.
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
-// somente na barra de deteccao; FVG+ fica acima de 101 e FVG- abaixo de 100.
+// somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
+// sao conectados. FVG+ fica acima de 101 e FVG- abaixo de 100.
 
 input
   EstruturaSwing(50);
@@ -66,6 +67,7 @@ var
   FVGBaixaTopo : Float;
   FVGBaixaFundo : Float;
   FVGLegendaOffset : Float;
+  MarcaLimiteFVG : String;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
   TamanhoFonteLegenda : Integer;
@@ -77,6 +79,7 @@ begin
   PosicaoTextoAbaixo := 1;
   TamanhoFonteLegenda := 8;
   TamanhoFonteEstrutura := 10;
+  MarcaLimiteFVG := "---";
   if CurrentBar <= 2 then
   begin
     SwingHigh := 0;
@@ -174,8 +177,8 @@ begin
     begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
-      PlotText("---", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, FVGAltaTopo);
-      PlotText("---", clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGAltaFundo);
+      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, FVGAltaTopo);
+      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGAltaFundo);
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
                FVGAltaTopo + FVGLegendaOffset);
     end;
@@ -183,8 +186,8 @@ begin
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
-      PlotText("---", clRed, PosicaoTextoAcima, TamanhoFonteLegenda, FVGBaixaTopo);
-      PlotText("---", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGBaixaFundo);
+      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, FVGBaixaTopo);
+      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGBaixaFundo);
       PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
                FVGBaixaFundo - FVGLegendaOffset);
     end;
