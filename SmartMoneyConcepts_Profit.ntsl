@@ -27,7 +27,7 @@ input
   ToleranciaEQPercentual(0.10);
   // Percentual de Close; valores negativos sao tratados como zero.
   FVGLegendaOffsetPercentual(0.05);
-  // Multiplicador para afastar a legenda das marcas de limite do FVG.
+  // Multiplicador de margem; valores nao positivos sao tratados como zero.
   FVGLegendaFatorMargem(2.0);
   // Distancia minima em pontos de preco; ajuste ao tick/tamanho do ativo.
   FVGLegendaOffsetMinimo(5.0);
@@ -102,7 +102,7 @@ begin
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
   FVGLegendaOffset := 0;
-  if FVGLegendaOffsetPercentual > 0 then
+  if (FVGLegendaOffsetPercentual > 0) and (FVGLegendaFatorMargem > 0) then
     FVGLegendaOffset :=
       Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
   if (FVGLegendaOffsetMinimo > 0) and
@@ -172,7 +172,8 @@ begin
 
   if MostrarFVG and (CurrentBar > 2) then
   begin
-    // As duas marcas e a legenda ficam somente na barra de deteccao.
+    // O limite superior e marcado acima do nivel; o inferior, abaixo.
+    // As marcas e a legenda ficam somente na barra de deteccao.
     if Low > High[2] then
     begin
       PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
