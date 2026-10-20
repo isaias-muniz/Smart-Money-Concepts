@@ -194,10 +194,11 @@ begin
   end;
 
   // Estados separados correspondem aos IDs fixos de plot 5/6 (alta) e 7/8
-  // (baixa), mantendo cores e limites independentes por direcao.
+  // (baixa). As transicoes abaixo sao espelhadas e devem ser alteradas juntas,
+  // pois cada direcao guarda limites, pendencia e temporizacao independentes.
   FVGAltaPlotAgora := False;
   FVGBaixaPlotAgora := False;
-  // Duas amostras consecutivas produzem um segmento curto de plot.
+  // Valor fixo para manter as linhas curtas e evitar poluir o grafico.
   BarrasSegmentoFVG := 2;
 
   if MostrarFVG and FVGAltaDetectado then
