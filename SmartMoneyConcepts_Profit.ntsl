@@ -105,6 +105,8 @@ begin
     OBBaixaAtivo := False;
     FVGAltaBarrasRestantes := 0;
     FVGBaixaBarrasRestantes := 0;
+    // Pelo menos 1; duas amostras desenham o segmento curto.
+    BarrasSegmentoFVG := 2;
     FVGAltaAguardarQuebra := 0;
     FVGBaixaAguardarQuebra := 0;
     FVGAltaPendente := False;
@@ -193,13 +195,11 @@ begin
     end;
   end;
 
-  // Estados separados correspondem aos IDs fixos de plot 5/6 (alta) e 7/8
-  // (baixa). As transicoes abaixo sao espelhadas e devem ser alteradas juntas,
-  // pois cada direcao guarda limites, pendencia e temporizacao independentes.
+  // Estados separados sao necessarios para manter simultaneamente os IDs fixos
+  // 5/6 (alta) e 7/8 (baixa), com limites e temporizadores independentes.
+  // As transicoes espelhadas devem ser atualizadas juntas.
   FVGAltaPlotAgora := False;
   FVGBaixaPlotAgora := False;
-  // Valor fixo para manter as linhas curtas e evitar poluir o grafico.
-  BarrasSegmentoFVG := 2;
 
   if MostrarFVG and FVGAltaDetectado then
   begin
