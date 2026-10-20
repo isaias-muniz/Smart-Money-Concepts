@@ -65,6 +65,7 @@ var
   FVGBaixaPlotAgora : Boolean;
   FVGAltaBarrasRestantes : Integer;
   FVGBaixaBarrasRestantes : Integer;
+  BarrasSegmentoFVG : Integer;
   FVGAltaTopo : Float;
   FVGAltaFundo : Float;
   FVGBaixaTopo : Float;
@@ -179,6 +180,8 @@ begin
   // Estado e plots separados mantem cor/limites independentes por direcao.
   FVGAltaPlotAgora := False;
   FVGBaixaPlotAgora := False;
+  // Duas amostras consecutivas produzem um segmento curto de plot.
+  BarrasSegmentoFVG := 2;
 
   if not MostrarFVG then
   begin
@@ -204,7 +207,7 @@ begin
   if MostrarFVG and (FVGAltaBarrasRestantes > 0) then
   begin
     if FVGAltaDetectado then
-      FVGAltaBarrasRestantes := 2
+      FVGAltaBarrasRestantes := BarrasSegmentoFVG
     else
     begin
       FVGAltaPlotAgora := True;
@@ -214,13 +217,13 @@ begin
   else if MostrarFVG and FVGAltaDetectado then
   begin
     FVGAltaPlotAgora := True;
-    FVGAltaBarrasRestantes := 1;
+    FVGAltaBarrasRestantes := BarrasSegmentoFVG - 1;
   end;
 
   if MostrarFVG and (FVGBaixaBarrasRestantes > 0) then
   begin
     if FVGBaixaDetectado then
-      FVGBaixaBarrasRestantes := 2
+      FVGBaixaBarrasRestantes := BarrasSegmentoFVG
     else
     begin
       FVGBaixaPlotAgora := True;
@@ -230,7 +233,7 @@ begin
   else if MostrarFVG and FVGBaixaDetectado then
   begin
     FVGBaixaPlotAgora := True;
-    FVGBaixaBarrasRestantes := 1;
+    FVGBaixaBarrasRestantes := BarrasSegmentoFVG - 1;
   end;
 
   if OBAltaAtivo and (Low <= OBAltaFundo) then
