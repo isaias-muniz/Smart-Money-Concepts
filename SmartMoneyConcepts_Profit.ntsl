@@ -10,28 +10,18 @@
 // visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
 // por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
 // de hover do cursor; a coloracao e aplicada somente no candle da quebra.
-// Cada FVG e marcado com dois segmentos curtos na barra de deteccao; eles nao
-// se estendem nem conectam barras posteriores.
+// Cada FVG tem duas linhas pontilhadas curtas na zona, sem extensao continua.
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
-// Somente as legendas FVG recebem deslocamento; as demais mantem a posicao original.
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
-// somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
-// sao conectados. Offset zero/negativo usa no minimo 0.01% do Close e a legenda
-// fica afastada pelo menos pela amplitude High-Low da barra.
+// por duas barras; sem gap nao ha linhas. A legenda deve ficar entre os limites.
 
 input
   EstruturaSwing(50);
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
-  // Percentual de Close; valores negativos sao tratados como zero.
-  FVGLegendaOffsetPercentual(0.05);
-  // Multiplicador de margem; valores nao positivos sao tratados como zero.
-  FVGLegendaFatorMargem(2.0);
-  // Distancia percentual minima do preco para separar legenda e limite.
-  FVGLegendaOffsetMinimoPercentual(0.01);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
   MostrarSwings(True);
@@ -69,9 +59,14 @@ var
   OBBaixaAtivo : Boolean;
   FVGAltaDetectado : Boolean;
   FVGBaixaDetectado : Boolean;
-  FVGLegendaOffset : Float;
-  FVGLegendaOffsetMinimo : Float;
-  TextoMarcadorLimiteFVG : String;
+  FVGAltaPlotAgora : Boolean;
+  FVGBaixaPlotAgora : Boolean;
+  FVGAltaBarrasRestantes : Integer;
+  FVGBaixaBarrasRestantes : Integer;
+  FVGAltaTopo : Float;
+  FVGAltaFundo : Float;
+  FVGBaixaTopo : Float;
+  FVGBaixaFundo : Float;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
   TamanhoFonteLegenda : Integer;
@@ -83,7 +78,6 @@ begin
   PosicaoTextoAbaixo := 1;
   TamanhoFonteLegenda := 8;
   TamanhoFonteEstrutura := 10;
-  TextoMarcadorLimiteFVG := "---";
   if CurrentBar <= 2 then
   begin
     SwingHigh := 0;
@@ -98,6 +92,12 @@ begin
     TendenciaInterna := 0;
     OBAltaAtivo := False;
     OBBaixaAtivo := False;
+    FVGAltaBarrasRestantes := 0;
+    FVGBaixaBarrasRestantes := 0;
+    FVGAltaTopo := 0;
+    FVGAltaFundo := 0;
+    FVGBaixaTopo := 0;
+    FVGBaixaFundo := 0;
   end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
@@ -111,23 +111,6 @@ begin
   begin
     FVGAltaDetectado := Low > High[2];
     FVGBaixaDetectado := High < Low[2];
-  end;
-
-  FVGLegendaOffset := 0;
-  FVGLegendaOffsetMinimo := 0;
-  if FVGAltaDetectado or FVGBaixaDetectado then
-  begin
-    if FVGLegendaOffsetMinimoPercentual > 0 then
-      FVGLegendaOffsetMinimo :=
-        Close * FVGLegendaOffsetMinimoPercentual / 100;
-    if (FVGLegendaOffsetPercentual > 0) and
-       (FVGLegendaFatorMargem > 0) then
-      FVGLegendaOffset :=
-        Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
-    if FVGLegendaOffset < FVGLegendaOffsetMinimo then
-      FVGLegendaOffset := FVGLegendaOffsetMinimo;
-    if (High - Low) > FVGLegendaOffset then
-      FVGLegendaOffset := High - Low;
   end;
 
   if CurrentBar > (EstruturaSwing * 2) then
@@ -191,24 +174,59 @@ begin
     end;
   end;
 
-  if FVGAltaDetectado or FVGBaixaDetectado then
+  FVGAltaPlotAgora := False;
+  FVGBaixaPlotAgora := False;
+
+  if not MostrarFVG then
   begin
-    // O limite superior e marcado acima do nivel; o inferior, abaixo.
-    // As marcas e a legenda ficam somente na barra de deteccao.
+    FVGAltaBarrasRestantes := 0;
+    FVGBaixaBarrasRestantes := 0;
+  end
+  else if FVGAltaDetectado then
+  begin
+    FVGAltaTopo := Low;
+    FVGAltaFundo := High[2];
+    PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
+             (FVGAltaTopo + FVGAltaFundo) / 2);
+  end;
+  if MostrarFVG and FVGBaixaDetectado then
+  begin
+    FVGBaixaTopo := Low[2];
+    FVGBaixaFundo := High;
+    PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
+             (FVGBaixaTopo + FVGBaixaFundo) / 2);
+  end;
+
+  if MostrarFVG and (FVGAltaBarrasRestantes > 0) then
+  begin
     if FVGAltaDetectado then
+      FVGAltaBarrasRestantes := 2
+    else
     begin
-      PlotText(TextoMarcadorLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
-      PlotText(TextoMarcadorLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, High[2]);
-      PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
-               Low + FVGLegendaOffset);
+      FVGAltaPlotAgora := True;
+      FVGAltaBarrasRestantes := FVGAltaBarrasRestantes - 1;
     end;
+  end
+  else if MostrarFVG and FVGAltaDetectado then
+  begin
+    FVGAltaPlotAgora := True;
+    FVGAltaBarrasRestantes := 1;
+  end;
+
+  if MostrarFVG and (FVGBaixaBarrasRestantes > 0) then
+  begin
     if FVGBaixaDetectado then
+      FVGBaixaBarrasRestantes := 2
+    else
     begin
-      PlotText(TextoMarcadorLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, Low[2]);
-      PlotText(TextoMarcadorLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, High);
-      PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
-               High - FVGLegendaOffset);
+      FVGBaixaPlotAgora := True;
+      FVGBaixaBarrasRestantes := FVGBaixaBarrasRestantes - 1;
     end;
+  end
+  else if MostrarFVG and FVGBaixaDetectado then
+  begin
+    FVGBaixaPlotAgora := True;
+    FVGBaixaBarrasRestantes := 1;
   end;
 
   if OBAltaAtivo and (Low <= OBAltaFundo) then
@@ -362,11 +380,35 @@ begin
     NoPlot(4);
   end;
 
-  // Plots 5-8 sao aposentados; reservados para preservar os IDs dos plots de OB 9-12.
-  NoPlot(5);
-  NoPlot(6);
-  NoPlot(7);
-  NoPlot(8);
+  if FVGAltaPlotAgora then
+  begin
+    Plot5(FVGAltaTopo);
+    Plot6(FVGAltaFundo);
+    SetPlotColor(5, clGreen);
+    SetPlotColor(6, clGreen);
+    SetPlotStyle(5, psDot);
+    SetPlotStyle(6, psDot);
+  end
+  else
+  begin
+    NoPlot(5);
+    NoPlot(6);
+  end;
+
+  if FVGBaixaPlotAgora then
+  begin
+    Plot7(FVGBaixaTopo);
+    Plot8(FVGBaixaFundo);
+    SetPlotColor(7, clRed);
+    SetPlotColor(8, clRed);
+    SetPlotStyle(7, psDot);
+    SetPlotStyle(8, psDot);
+  end
+  else
+  begin
+    NoPlot(7);
+    NoPlot(8);
+  end;
 
   if MostrarOrderBlocks then
   begin
