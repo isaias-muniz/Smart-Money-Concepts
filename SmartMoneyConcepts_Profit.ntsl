@@ -66,6 +66,8 @@ var
   OBBaixaFundo : Float;
   OBAltaAtivo : Boolean;
   OBBaixaAtivo : Boolean;
+  FVGAltaDetectado : Boolean;
+  FVGBaixaDetectado : Boolean;
   FVGLegendaOffset : Float;
   MarcaLimiteFVG : String;
   PosicaoTextoAcima : Integer;
@@ -101,9 +103,16 @@ begin
   QuebraInternaBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
+  FVGAltaDetectado := False;
+  FVGBaixaDetectado := False;
+  if MostrarFVG and (CurrentBar > 2) then
+  begin
+    FVGAltaDetectado := Low > High[2];
+    FVGBaixaDetectado := High < Low[2];
+  end;
+
   FVGLegendaOffset := 0;
-  if MostrarFVG and (CurrentBar > 2) and
-     ((Low > High[2]) or (High < Low[2])) then
+  if FVGAltaDetectado or FVGBaixaDetectado then
   begin
     if (FVGLegendaOffsetPercentual > 0) and
        (FVGLegendaFatorMargem > 0) then
@@ -175,18 +184,18 @@ begin
     end;
   end;
 
-  if MostrarFVG and (CurrentBar > 2) then
+  if FVGAltaDetectado or FVGBaixaDetectado then
   begin
     // O limite superior e marcado acima do nivel; o inferior, abaixo.
     // As marcas e a legenda ficam somente na barra de deteccao.
-    if Low > High[2] then
+    if FVGAltaDetectado then
     begin
       PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
       PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, High[2]);
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
                Low + FVGLegendaOffset);
     end;
-    if High < Low[2] then
+    if FVGBaixaDetectado then
     begin
       PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, Low[2]);
       PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, High);
@@ -346,7 +355,7 @@ begin
     NoPlot(4);
   end;
 
-  // Plots 5-8 eram linhas continuas de FVG; estao aposentados para evitar poluicao.
+  // Plots 5-8 sao aposentados; reservados para preservar os IDs dos plots de OB 9-12.
   NoPlot(5);
   NoPlot(6);
   NoPlot(7);
