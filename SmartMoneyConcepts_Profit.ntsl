@@ -18,7 +18,7 @@
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
 // somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
-// sao conectados. FVG+ fica acima de 101 e FVG- abaixo de 100.
+// sao conectados. As legendas ficam duas vezes o offset alem dos limites.
 
 input
   EstruturaSwing(50);
@@ -62,10 +62,6 @@ var
   OBBaixaFundo : Float;
   OBAltaAtivo : Boolean;
   OBBaixaAtivo : Boolean;
-  FVGAltaTopo : Float;
-  FVGAltaFundo : Float;
-  FVGBaixaTopo : Float;
-  FVGBaixaFundo : Float;
   FVGLegendaOffset : Float;
   MarcaLimiteFVG : String;
   PosicaoTextoAcima : Integer;
@@ -94,10 +90,6 @@ begin
     TendenciaInterna := 0;
     OBAltaAtivo := False;
     OBBaixaAtivo := False;
-    FVGAltaTopo := 0;
-    FVGAltaFundo := 0;
-    FVGBaixaTopo := 0;
-    FVGBaixaFundo := 0;
   end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
@@ -175,21 +167,17 @@ begin
     // As duas marcas e a legenda ficam somente na barra de deteccao.
     if Low > High[2] then
     begin
-      FVGAltaTopo := Low;
-      FVGAltaFundo := High[2];
-      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, FVGAltaTopo);
-      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGAltaFundo);
+      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
+      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, High[2]);
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
-               FVGAltaTopo + FVGLegendaOffset);
+               Low + (2 * FVGLegendaOffset));
     end;
     if High < Low[2] then
     begin
-      FVGBaixaTopo := Low[2];
-      FVGBaixaFundo := High;
-      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, FVGBaixaTopo);
-      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGBaixaFundo);
+      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, Low[2]);
+      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, High);
       PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
-               FVGBaixaFundo - FVGLegendaOffset);
+               High - (2 * FVGLegendaOffset));
     end;
   end;
 
