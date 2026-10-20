@@ -18,15 +18,17 @@
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
 // somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
-// sao conectados. O offset da legenda e calculado com margem adicional.
+// sao conectados. Com percentual zero e minimo 5, as legendas ficam em 106/95.
 
 input
   EstruturaSwing(50);
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
-  // Percentual de Close; 0.05 = 0.05% antes da margem adicional. Negativo = zero.
+  // Percentual de Close; valores negativos sao tratados como zero.
   FVGLegendaOffsetPercentual(0.05);
+  // Distancia minima em pontos de preco; ajuste ao tick/tamanho do ativo.
+  FVGLegendaOffsetMinimo(5.0);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
   MostrarSwings(True);
@@ -63,6 +65,7 @@ var
   OBAltaAtivo : Boolean;
   OBBaixaAtivo : Boolean;
   FVGLegendaOffset : Float;
+  FatorMargemLegendaFVG : Float;
   MarcaLimiteFVG : String;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
@@ -97,9 +100,14 @@ begin
   QuebraInternaBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
+  FatorMargemLegendaFVG := 2;
   FVGLegendaOffset := 0;
   if FVGLegendaOffsetPercentual > 0 then
-    FVGLegendaOffset := Close * (FVGLegendaOffsetPercentual * 2) / 100;
+    FVGLegendaOffset :=
+      Close * FVGLegendaOffsetPercentual * FatorMargemLegendaFVG / 100;
+  if (FVGLegendaOffsetMinimo > 0) and
+     (FVGLegendaOffset < FVGLegendaOffsetMinimo) then
+    FVGLegendaOffset := FVGLegendaOffsetMinimo;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
