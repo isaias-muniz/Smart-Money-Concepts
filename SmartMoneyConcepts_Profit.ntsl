@@ -102,12 +102,17 @@ begin
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
   FVGLegendaOffset := 0;
-  if (FVGLegendaOffsetPercentual > 0) and (FVGLegendaFatorMargem > 0) then
-    FVGLegendaOffset :=
-      Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
-  if (FVGLegendaOffsetMinimo > 0) and
-     (FVGLegendaOffset < FVGLegendaOffsetMinimo) then
-    FVGLegendaOffset := FVGLegendaOffsetMinimo;
+  if MostrarFVG and (CurrentBar > 2) and
+     ((Low > High[2]) or (High < Low[2])) then
+  begin
+    if (FVGLegendaOffsetPercentual > 0) and
+       (FVGLegendaFatorMargem > 0) then
+      FVGLegendaOffset :=
+        Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
+    if (FVGLegendaOffsetMinimo > 0) and
+       (FVGLegendaOffset < FVGLegendaOffsetMinimo) then
+      FVGLegendaOffset := FVGLegendaOffsetMinimo;
+  end;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
