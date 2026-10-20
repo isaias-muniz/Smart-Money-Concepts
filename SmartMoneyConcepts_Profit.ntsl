@@ -27,6 +27,8 @@ input
   ToleranciaEQPercentual(0.10);
   // Percentual de Close; valores negativos sao tratados como zero.
   FVGLegendaOffsetPercentual(0.05);
+  // Multiplicador para afastar a legenda das marcas de limite do FVG.
+  FVGLegendaFatorMargem(2.0);
   // Distancia minima em pontos de preco; ajuste ao tick/tamanho do ativo.
   FVGLegendaOffsetMinimo(5.0);
   MostrarEstruturaSwing(True);
@@ -65,7 +67,6 @@ var
   OBAltaAtivo : Boolean;
   OBBaixaAtivo : Boolean;
   FVGLegendaOffset : Float;
-  FatorMargemLegendaFVG : Float;
   MarcaLimiteFVG : String;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
@@ -100,11 +101,10 @@ begin
   QuebraInternaBaixaAgora := False;
   DirecaoQuebraAgora := 0;
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
-  FatorMargemLegendaFVG := 2;
   FVGLegendaOffset := 0;
   if FVGLegendaOffsetPercentual > 0 then
     FVGLegendaOffset :=
-      Close * FVGLegendaOffsetPercentual * FatorMargemLegendaFVG / 100;
+      Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
   if (FVGLegendaOffsetMinimo > 0) and
      (FVGLegendaOffset < FVGLegendaOffsetMinimo) then
     FVGLegendaOffset := FVGLegendaOffsetMinimo;
