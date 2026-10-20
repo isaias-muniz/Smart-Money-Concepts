@@ -176,6 +176,7 @@ begin
     end;
   end;
 
+  // Estado e plots separados mantem cor/limites independentes por direcao.
   FVGAltaPlotAgora := False;
   FVGBaixaPlotAgora := False;
 
