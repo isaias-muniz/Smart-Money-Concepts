@@ -10,15 +10,14 @@
 // visual objeto-a-objeto. Os OBs representam apenas o bloco swing mais recente
 // por direcao; Order Blocks internos nao estao incluidos. NTSL nao expoe evento
 // de hover do cursor; a coloracao e aplicada somente no candle da quebra.
-// Os FVGs exibem apenas o gap mais recente por direcao; um novo gap substitui
-// as linhas de qualquer gap anterior ainda nao preenchido nessa direcao.
+// Cada FVG e marcado com dois segmentos curtos na barra de deteccao; eles nao
+// se estendem nem conectam barras posteriores.
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
 // Somente as legendas FVG recebem deslocamento; as demais mantem a posicao original.
-// Validacao manual: High[2]=100 e Low=101 geram FVG+ em 101/100; Low
-// futuro <=100 preenche-o. Low[2]=101 e High=100 geram FVG- em 101/100;
-// High futuro >=101 preenche-o. Um novo gap da mesma direcao substitui esses
-// niveis. As legendas ficam em 101+FVGLegendaOffset e 100-FVGLegendaOffset.
+// Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
+// Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
+// somente na barra de deteccao; FVG+ fica acima de 101 e FVG- abaixo de 100.
 
 input
   EstruturaSwing(50);
@@ -66,8 +65,6 @@ var
   FVGAltaFundo : Float;
   FVGBaixaTopo : Float;
   FVGBaixaFundo : Float;
-  FVGAltaAtivo : Boolean;
-  FVGBaixaAtivo : Boolean;
   FVGLegendaOffset : Float;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
@@ -98,8 +95,6 @@ begin
     FVGAltaFundo := 0;
     FVGBaixaTopo := 0;
     FVGBaixaFundo := 0;
-    FVGAltaAtivo := False;
-    FVGBaixaAtivo := False;
   end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
@@ -172,21 +167,15 @@ begin
     end;
   end;
 
-  // Mitiga gaps ativos antes de detectar novos (mesmo ocultos); novos gaps so
-  // sao detectados com MostrarFVG ativo e substituem os niveis anteriores.
-  if FVGAltaAtivo and (Low <= FVGAltaFundo) then
-    FVGAltaAtivo := False;
-  if FVGBaixaAtivo and (High >= FVGBaixaTopo) then
-    FVGBaixaAtivo := False;
-
   if MostrarFVG and (CurrentBar > 2) then
   begin
-    // A legenda e plotada na barra de deteccao (terceira barra do padrao).
+    // As duas marcas e a legenda ficam somente na barra de deteccao.
     if Low > High[2] then
     begin
       FVGAltaTopo := Low;
       FVGAltaFundo := High[2];
-      FVGAltaAtivo := True;
+      PlotText("---", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, FVGAltaTopo);
+      PlotText("---", clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGAltaFundo);
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
                FVGAltaTopo + FVGLegendaOffset);
     end;
@@ -194,7 +183,8 @@ begin
     begin
       FVGBaixaTopo := Low[2];
       FVGBaixaFundo := High;
-      FVGBaixaAtivo := True;
+      PlotText("---", clRed, PosicaoTextoAcima, TamanhoFonteLegenda, FVGBaixaTopo);
+      PlotText("---", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, FVGBaixaFundo);
       PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
                FVGBaixaFundo - FVGLegendaOffset);
     end;
@@ -351,40 +341,10 @@ begin
     NoPlot(4);
   end;
 
-  if MostrarFVG then
-  begin
-    if FVGAltaAtivo then
-    begin
-      Plot5(FVGAltaTopo);
-      Plot6(FVGAltaFundo);
-      SetPlotColor(5, clGreen);
-      SetPlotColor(6, clGreen);
-    end
-    else
-    begin
-      NoPlot(5);
-      NoPlot(6);
-    end;
-    if FVGBaixaAtivo then
-    begin
-      Plot7(FVGBaixaTopo);
-      Plot8(FVGBaixaFundo);
-      SetPlotColor(7, clRed);
-      SetPlotColor(8, clRed);
-    end
-    else
-    begin
-      NoPlot(7);
-      NoPlot(8);
-    end;
-  end;
-  if not MostrarFVG then
-  begin
-    NoPlot(5);
-    NoPlot(6);
-    NoPlot(7);
-    NoPlot(8);
-  end;
+  NoPlot(5);
+  NoPlot(6);
+  NoPlot(7);
+  NoPlot(8);
 
   if MostrarOrderBlocks then
   begin
