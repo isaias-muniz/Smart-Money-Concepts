@@ -15,7 +15,9 @@
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
-// por duas barras; sem gap nao ha linhas. A legenda deve ficar entre os limites.
+// por duas barras; sem gap nao ha linhas. Se gaps da mesma direcao forem
+// consecutivos, a linha anterior e interrompida e a nova aparece nas duas
+// barras seguintes. FVG+/- fica no meio da zona, entre os dois limites.
 
 input
   EstruturaSwing(50);
@@ -181,7 +183,7 @@ begin
   begin
     FVGAltaBarrasRestantes := 0;
     FVGBaixaBarrasRestantes := 0;
-  end
+  end;
 
   if MostrarFVG and FVGAltaDetectado then
   begin
