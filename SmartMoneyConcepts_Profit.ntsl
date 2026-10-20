@@ -14,10 +14,11 @@
 // A deteccao FVG usa somente Low > High[2] ou High < Low[2], sem filtro para
 // fechamento/direcao do candle intermediario ou tamanho minimo do gap.
 // Validacao manual: High[2]=100 e Low=101 geram FVG+ em 101/100; Low[2]=101
-// e High=100 geram FVG- em 101/100. Cada par aparece na deteccao e na barra
-// seguinte; sem gap nao ha linha. Se outro gap da mesma direcao surgir durante
-// o segmento, NoPlot interrompe a linha e o novo par aparece nas duas barras
-// seguintes a deteccao. FVG+/- fica no meio da zona, entre os limites.
+// e High=100 geram FVG- em 101/100. Evento isolado: plot na deteccao e na barra
+// seguinte; sem gap nao ha linha. Evento consecutivo da mesma direcao: NoPlot
+// interrompe o segmento, preserva os niveis atuais e inicia o novo na proxima
+// barra; se outro surgir enquanto pendente, os niveis pendentes sao atualizados.
+// FVG+/- fica no meio da zona, entre os limites.
 
 input
   EstruturaSwing(50);
@@ -63,13 +64,19 @@ var
   FVGBaixaDetectado : Boolean;
   FVGAltaPlotAgora : Boolean;
   FVGBaixaPlotAgora : Boolean;
+  FVGAltaPendente : Boolean;
+  FVGBaixaPendente : Boolean;
   FVGAltaBarrasRestantes : Integer;
   FVGBaixaBarrasRestantes : Integer;
   BarrasSegmentoFVG : Integer;
   FVGAltaTopo : Float;
   FVGAltaFundo : Float;
+  FVGAltaPendenteTopo : Float;
+  FVGAltaPendenteFundo : Float;
   FVGBaixaTopo : Float;
   FVGBaixaFundo : Float;
+  FVGBaixaPendenteTopo : Float;
+  FVGBaixaPendenteFundo : Float;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
   TamanhoFonteLegenda : Integer;
@@ -97,10 +104,16 @@ begin
     OBBaixaAtivo := False;
     FVGAltaBarrasRestantes := 0;
     FVGBaixaBarrasRestantes := 0;
+    FVGAltaPendente := False;
+    FVGBaixaPendente := False;
     FVGAltaTopo := 0;
     FVGAltaFundo := 0;
+    FVGAltaPendenteTopo := 0;
+    FVGAltaPendenteFundo := 0;
     FVGBaixaTopo := 0;
     FVGBaixaFundo := 0;
+    FVGBaixaPendenteTopo := 0;
+    FVGBaixaPendenteFundo := 0;
   end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
@@ -184,57 +197,97 @@ begin
   // Duas amostras consecutivas produzem um segmento curto de plot.
   BarrasSegmentoFVG := 2;
 
+  if MostrarFVG and FVGAltaDetectado then
+  begin
+    PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
+             (Low + High[2]) / 2);
+  end;
+  if MostrarFVG and FVGBaixaDetectado then
+  begin
+    PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
+             (Low[2] + High) / 2);
+  end;
+
   if not MostrarFVG then
   begin
     FVGAltaBarrasRestantes := 0;
     FVGBaixaBarrasRestantes := 0;
-  end;
-
-  if MostrarFVG and FVGAltaDetectado then
+    FVGAltaPendente := False;
+    FVGBaixaPendente := False;
+  end
+  else
   begin
-    FVGAltaTopo := Low;
-    FVGAltaFundo := High[2];
-    PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
-             (FVGAltaTopo + FVGAltaFundo) / 2);
-  end;
-  if MostrarFVG and FVGBaixaDetectado then
-  begin
-    FVGBaixaTopo := Low[2];
-    FVGBaixaFundo := High;
-    PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
-             (FVGBaixaTopo + FVGBaixaFundo) / 2);
-  end;
-
-  if MostrarFVG and (FVGAltaBarrasRestantes > 0) then
-  begin
-    if FVGAltaDetectado then
-      FVGAltaBarrasRestantes := BarrasSegmentoFVG
-    else
+    if FVGAltaBarrasRestantes > 0 then
     begin
+      if FVGAltaDetectado then
+      begin
+        FVGAltaPendente := True;
+        FVGAltaPendenteTopo := Low;
+        FVGAltaPendenteFundo := High[2];
+        FVGAltaBarrasRestantes := 0;
+      end
+      else
+      begin
+        FVGAltaPlotAgora := True;
+        FVGAltaBarrasRestantes := FVGAltaBarrasRestantes - 1;
+      end;
+    end
+    else if FVGAltaPendente then
+    begin
+      if FVGAltaDetectado then
+      begin
+        FVGAltaPendenteTopo := Low;
+        FVGAltaPendenteFundo := High[2];
+      end;
+      FVGAltaTopo := FVGAltaPendenteTopo;
+      FVGAltaFundo := FVGAltaPendenteFundo;
+      FVGAltaPendente := False;
       FVGAltaPlotAgora := True;
-      FVGAltaBarrasRestantes := FVGAltaBarrasRestantes - 1;
-    end;
-  end
-  else if MostrarFVG and FVGAltaDetectado then
-  begin
-    FVGAltaPlotAgora := True;
-    FVGAltaBarrasRestantes := BarrasSegmentoFVG - 1;
-  end;
-
-  if MostrarFVG and (FVGBaixaBarrasRestantes > 0) then
-  begin
-    if FVGBaixaDetectado then
-      FVGBaixaBarrasRestantes := BarrasSegmentoFVG
-    else
+      FVGAltaBarrasRestantes := BarrasSegmentoFVG - 1;
+    end
+    else if FVGAltaDetectado then
     begin
-      FVGBaixaPlotAgora := True;
-      FVGBaixaBarrasRestantes := FVGBaixaBarrasRestantes - 1;
+      FVGAltaTopo := Low;
+      FVGAltaFundo := High[2];
+      FVGAltaPlotAgora := True;
+      FVGAltaBarrasRestantes := BarrasSegmentoFVG - 1;
     end;
-  end
-  else if MostrarFVG and FVGBaixaDetectado then
-  begin
-    FVGBaixaPlotAgora := True;
-    FVGBaixaBarrasRestantes := BarrasSegmentoFVG - 1;
+
+    if FVGBaixaBarrasRestantes > 0 then
+    begin
+      if FVGBaixaDetectado then
+      begin
+        FVGBaixaPendente := True;
+        FVGBaixaPendenteTopo := Low[2];
+        FVGBaixaPendenteFundo := High;
+        FVGBaixaBarrasRestantes := 0;
+      end
+      else
+      begin
+        FVGBaixaPlotAgora := True;
+        FVGBaixaBarrasRestantes := FVGBaixaBarrasRestantes - 1;
+      end;
+    end
+    else if FVGBaixaPendente then
+    begin
+      if FVGBaixaDetectado then
+      begin
+        FVGBaixaPendenteTopo := Low[2];
+        FVGBaixaPendenteFundo := High;
+      end;
+      FVGBaixaTopo := FVGBaixaPendenteTopo;
+      FVGBaixaFundo := FVGBaixaPendenteFundo;
+      FVGBaixaPendente := False;
+      FVGBaixaPlotAgora := True;
+      FVGBaixaBarrasRestantes := BarrasSegmentoFVG - 1;
+    end
+    else if FVGBaixaDetectado then
+    begin
+      FVGBaixaTopo := Low[2];
+      FVGBaixaFundo := High;
+      FVGBaixaPlotAgora := True;
+      FVGBaixaBarrasRestantes := BarrasSegmentoFVG - 1;
+    end;
   end;
 
   if OBAltaAtivo and (Low <= OBAltaFundo) then
