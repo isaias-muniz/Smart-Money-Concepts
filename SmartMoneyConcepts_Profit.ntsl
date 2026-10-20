@@ -18,14 +18,14 @@
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
 // somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
-// sao conectados. As legendas ficam duas vezes o offset alem dos limites.
+// sao conectados. O offset da legenda e calculado com margem adicional.
 
 input
   EstruturaSwing(50);
   EstruturaInterna(5);
   BarrasBuscaOB(20);
   ToleranciaEQPercentual(0.10);
-  // Percentual de Close; 0.05 = 0.05%. Valores negativos sao tratados como zero.
+  // Percentual de Close; 0.05 = 0.05% antes da margem adicional. Negativo = zero.
   FVGLegendaOffsetPercentual(0.05);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
@@ -99,7 +99,7 @@ begin
   ToleranciaEQ := Close * ToleranciaEQPercentual / 100;
   FVGLegendaOffset := 0;
   if FVGLegendaOffsetPercentual > 0 then
-    FVGLegendaOffset := Close * FVGLegendaOffsetPercentual / 100;
+    FVGLegendaOffset := Close * (FVGLegendaOffsetPercentual * 2) / 100;
 
   if CurrentBar > (EstruturaSwing * 2) then
   begin
@@ -170,14 +170,14 @@ begin
       PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
       PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, High[2]);
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
-               Low + (2 * FVGLegendaOffset));
+               Low + FVGLegendaOffset);
     end;
     if High < Low[2] then
     begin
       PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, Low[2]);
       PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, High);
       PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
-               High - (2 * FVGLegendaOffset));
+               High - FVGLegendaOffset);
     end;
   end;
 
@@ -332,6 +332,7 @@ begin
     NoPlot(4);
   end;
 
+  // Plots 5-8 eram linhas continuas de FVG; estao aposentados para evitar poluicao.
   NoPlot(5);
   NoPlot(6);
   NoPlot(7);
