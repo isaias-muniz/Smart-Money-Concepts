@@ -182,7 +182,8 @@ begin
     FVGAltaBarrasRestantes := 0;
     FVGBaixaBarrasRestantes := 0;
   end
-  else if FVGAltaDetectado then
+
+  if MostrarFVG and FVGAltaDetectado then
   begin
     FVGAltaTopo := Low;
     FVGAltaFundo := High[2];
