@@ -18,7 +18,7 @@
 // Validacao manual: High[2]=100 e Low=101 geram dois segmentos FVG+ em 101/100;
 // Low[2]=101 e High=100 geram dois segmentos FVG- em 101/100. Ambos aparecem
 // somente na barra de deteccao; sem gap nao ha marcas e eventos separados nao
-// sao conectados. Com percentual zero e minimo 5, as legendas ficam em 106/95.
+// sao conectados. Offset percentual zero usa o minimo de 0.01% do Close.
 
 input
   EstruturaSwing(50);
@@ -29,8 +29,8 @@ input
   FVGLegendaOffsetPercentual(0.05);
   // Multiplicador de margem; valores nao positivos sao tratados como zero.
   FVGLegendaFatorMargem(2.0);
-  // Distancia minima em pontos de preco; ajuste ao tick/tamanho do ativo.
-  FVGLegendaOffsetMinimo(5.0);
+  // Distancia percentual minima do preco para separar legenda e limite.
+  FVGLegendaOffsetMinimoPercentual(0.01);
   MostrarEstruturaSwing(True);
   MostrarEstruturaInterna(True);
   MostrarSwings(True);
@@ -69,7 +69,8 @@ var
   FVGAltaDetectado : Boolean;
   FVGBaixaDetectado : Boolean;
   FVGLegendaOffset : Float;
-  MarcaLimiteFVG : String;
+  FVGLegendaOffsetMinimo : Float;
+  TextoMarcadorLimiteFVG : String;
   PosicaoTextoAcima : Integer;
   PosicaoTextoAbaixo : Integer;
   TamanhoFonteLegenda : Integer;
@@ -81,7 +82,6 @@ begin
   PosicaoTextoAbaixo := 1;
   TamanhoFonteLegenda := 8;
   TamanhoFonteEstrutura := 10;
-  MarcaLimiteFVG := "---";
   if CurrentBar <= 2 then
   begin
     SwingHigh := 0;
@@ -96,6 +96,7 @@ begin
     TendenciaInterna := 0;
     OBAltaAtivo := False;
     OBBaixaAtivo := False;
+    TextoMarcadorLimiteFVG := "---";
   end;
   QuebraSwingAltaAgora := False;
   QuebraSwingBaixaAgora := False;
@@ -112,14 +113,17 @@ begin
   end;
 
   FVGLegendaOffset := 0;
+  FVGLegendaOffsetMinimo := 0;
   if FVGAltaDetectado or FVGBaixaDetectado then
   begin
+    if FVGLegendaOffsetMinimoPercentual > 0 then
+      FVGLegendaOffsetMinimo :=
+        Close * FVGLegendaOffsetMinimoPercentual / 100;
     if (FVGLegendaOffsetPercentual > 0) and
        (FVGLegendaFatorMargem > 0) then
       FVGLegendaOffset :=
         Close * FVGLegendaOffsetPercentual * FVGLegendaFatorMargem / 100;
-    if (FVGLegendaOffsetMinimo > 0) and
-       (FVGLegendaOffset < FVGLegendaOffsetMinimo) then
+    if FVGLegendaOffset < FVGLegendaOffsetMinimo then
       FVGLegendaOffset := FVGLegendaOffsetMinimo;
   end;
 
@@ -190,15 +194,15 @@ begin
     // As marcas e a legenda ficam somente na barra de deteccao.
     if FVGAltaDetectado then
     begin
-      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
-      PlotText(MarcaLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, High[2]);
+      PlotText(TextoMarcadorLimiteFVG, clGreen, PosicaoTextoAcima, TamanhoFonteLegenda, Low);
+      PlotText(TextoMarcadorLimiteFVG, clGreen, PosicaoTextoAbaixo, TamanhoFonteLegenda, High[2]);
       PlotText("FVG+", clGreen, PosicaoTextoAcima, TamanhoFonteLegenda,
                Low + FVGLegendaOffset);
     end;
     if FVGBaixaDetectado then
     begin
-      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, Low[2]);
-      PlotText(MarcaLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, High);
+      PlotText(TextoMarcadorLimiteFVG, clRed, PosicaoTextoAcima, TamanhoFonteLegenda, Low[2]);
+      PlotText(TextoMarcadorLimiteFVG, clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda, High);
       PlotText("FVG-", clRed, PosicaoTextoAbaixo, TamanhoFonteLegenda,
                High - FVGLegendaOffset);
     end;
